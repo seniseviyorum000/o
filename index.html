@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İsim-Şehir-Hayvan-Bitki-Eşya Oyunu</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .game-area {
+            display: none;
+        }
+        .letter-display {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+        }
+        .categories {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .category {
+            display: flex;
+            flex-direction: column;
+        }
+        .category-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .start-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .finish-btn {
+            background-color: #f44336;
+            color: white;
+            display: none;
+        }
+        .results {
+            margin-top: 20px;
+            display: none;
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .result-header {
+            font-weight: bold;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .result-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .waiting-message {
+            text-align: center;
+            font-size: 20px;
+            margin: 30px 0;
+            color: #f44336;
+            display: none;
+        }
+        .game-over {
+            font-size: 24px;
+            text-align: center;
+            padding: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none;
+        }
+        .next-round {
+            background-color: #2196F3;
+            color: white;
+            display: none;
+        }
+        .game-code {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .join-game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        .join-game input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 200px;
+        }
+        .player-name {
+            margin-bottom: 15px;
+        }
+        .player-name input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>İsim-Şehir-Hayvan-Bitki-Eşya Oyunu</h1>
+        </div>
+
+        <div class="player-name">
+            <label class="category-label">Adınız:</label>
+            <input type="text" id="player-name" placeholder="Oyuna başlamadan önce adınızı yazın...">
+        </div>
+
+        <div class="score-board">
+            <div>Sen: <span id="your-score">0</span></div>
+            <div>Rakip: <span id="opponent-score">0</span></div>
+        </div>
+
+        <div class="game-code" id="game-code-display" style="display: none;">
+            Oyun Kodu: <span id="game-code">-</span>
+        </div>
+
+        <div class="join-game" id="join-game-area">
+            <input type="text" id="join-code" placeholder="Oyun kodunu girin...">
+            <button class="start-btn" id="join-btn">Oyuna Katıl</button>
+        </div>
+
+        <div class="waiting-message" id="waiting-message">
+            Rakip bekleniyor...
+        </div>
+
+        <div class="game-area" id="game-area">
+            <div class="letter-display" id="letter-display">A</div>
+            
+            <div class="categories">
+                <div class="category">
+                    <label class="category-label">İsim:</label>
+                    <input type="text" id="input-isim" placeholder="İsim yazın...">
+                </div>
+                <div class="category">
+                    <label class="category-label">Şehir:</label>
+                    <input type="text" id="input-sehir" placeholder="Şehir yazın...">
+                </div>
+                <div class="category">
+                    <label class="category-label">Hayvan:</label>
+                    <input type="text" id="input-hayvan" placeholder="Hayvan yazın...">
+                </div>
+                <div class="category">
+                    <label class="category-label">Bitki:</label>
+                    <input type="text" id="input-bitki" placeholder="Bitki yazın...">
+                </div>
+                <div class="category">
+                    <label class="category-label">Eşya:</label>
+                    <input type="text" id="input-esya" placeholder="Eşya yazın...">
+                </div>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <h2>Sonuçlar</h2>
+            <div class="result-grid">
+                <div class="result-header">Kategori</div>
+                <div class="result-header">Sen</div>
+                <div class="result-header">Rakip</div>
+                
+                <div class="result-item">İsim</div>
+                <div class="result-item" id="result-isim-you">-</div>
+                <div class="result-item" id="result-isim-opponent">-</div>
+                
+                <div class="result-item">Şehir</div>
+                <div class="result-item" id="result-sehir-you">-</div>
+                <div class="result-item" id="result-sehir-opponent">-</div>
+                
+                <div class="result-item">Hayvan</div>
+                <div class="result-item" id="result-hayvan-you">-</div>
+                <div class="result-item" id="result-hayvan-opponent">-</div>
+                
+                <div class="result-item">Bitki</div>
+                <div class="result-item" id="result-bitki-you">-</div>
+                <div class="result-item" id="result-bitki-opponent">-</div>
+                
+                <div class="result-item">Eşya</div>
+                <div class="result-item" id="result-esya-you">-</div>
+                <div class="result-item" id="result-esya-opponent">-</div>
+            </div>
+        </div>
+
+        <div class="game-over" id="game-over">
+            Oyun bitti! <span id="winner-message"></span>
+        </div>
+
+        <div class="button-container">
+            <button class="start-btn" id="start-btn">Yeni Oyun Başlat</button>
+            <button class="finish-btn" id="finish-btn">Bitir</button>
+            <button class="next-round" id="next-round-btn">Sonraki Tur</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, push, update, child, get } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+      
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyBZM2gx0NAZ4Be74SKxghnvjrg10pXPlqA",
+          authDomain: "isim-eb1b2.firebaseapp.com",
+          databaseURL: "https://isim-eb1b2-default-rtdb.firebaseio.com",
+          projectId: "isim-eb1b2",
+          storageBucket: "isim-eb1b2.firebasestorage.app",
+          messagingSenderId: "557321494058",
+          appId: "1:557321494058:web:e51d2383724a21298ced53",
+          measurementId: "G-6SKKV0MY1X"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase();
+
+        // DOM elementleri
+        const startBtn = document.getElementById('start-btn');
+        const joinBtn = document.getElementById('join-btn');
+        const finishBtn = document.getElementById('finish-btn');
+        const nextRoundBtn = document.getElementById('next-round-btn');
+        const waitingMessage = document.getElementById('waiting-message');
+        const gameArea = document.getElementById('game-area');
+        const resultsArea = document.getElementById('results');
+        const letterDisplay = document.getElementById('letter-display');
+        const gameOver = document.getElementById('game-over');
+        const winnerMessage = document.getElementById('winner-message');
+        const gameCodeDisplay = document.getElementById('game-code-display');
+        const gameCode = document.getElementById('game-code');
+        const joinGameArea = document.getElementById('join-game-area');
+        const joinCode = document.getElementById('join-code');
+        const playerNameInput = document.getElementById('player-name');
+        
+        const yourScoreDisplay = document.getElementById('your-score');
+        const opponentScoreDisplay = document.getElementById('opponent-score');
+        
+        const inputs = {
+            isim: document.getElementById('input-isim'),
+            sehir: document.getElementById('input-sehir'),
+            hayvan: document.getElementById('input-hayvan'),
+            bitki: document.getElementById('input-bitki'),
+            esya: document.getElementById('input-esya')
+        };
+
+        // Oyun değişkenleri
+        let currentGameId = null;
+        let playerId = null;
+        let opponentId = null;
+        let playerName = '';
+
+        // Yeni oyun başlat
+        startBtn.addEventListener('click', function() {
+            playerName = playerNameInput.value.trim();
+            if (!playerName) {
+                alert('Lütfen önce adınızı girin!');
+                return;
+            }
+
+            playerId = generatePlayerId();
+            
+            // Yeni oyun oluştur
+            const gameRef = push(ref(database, 'games'));
+            currentGameId = gameRef.key;
+            
+            // Oyun durumunu kaydet
+            set(gameRef, {
+                status: 'waiting',
+                currentLetter: '',
+                currentRound: 0,
+                players: {
+                    [playerId]: {
+                        name: playerName,
+                        score: 0,
+                        answers: {},
+                        ready: false
+                    }
+                },
+                usedLetters: []
+            });
+            
+            // Arayüzü güncelle
+            startBtn.style.display = 'none';
+            joinGameArea.style.display = 'none';
+            waitingMessage.style.display = 'block';
+            gameCodeDisplay.style.display = 'block';
+            gameCode.textContent = currentGameId;
+            
+            // Oyun durumunu dinle
+            listenToGameChanges(currentGameId);
+        });
+
+        // Oyuna katıl
+        joinBtn.addEventListener('click', function() {
+            playerName = playerNameInput.value.trim();
+            if (!playerName) {
+                alert('Lütfen önce adınızı girin!');
+                return;
+            }
+
+            const gameIdToJoin = joinCode.value.trim();
+            if (!gameIdToJoin) {
+                alert('Lütfen geçerli bir oyun kodu girin!');
+                return;
+            }
+            
+            playerId = generatePlayerId();
+            currentGameId = gameIdToJoin;
+            
+            // Oyun varlığını kontrol et
+            get(ref(database, `games/${gameIdToJoin}`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const gameData = snapshot.val();
+                    
+                    if (gameData.status === 'waiting') {
+                        // İkinci oyuncuyu ekle ve oyunu başlat
+                        const updates = {};
+                        
+                        // Mevcut oyuncuyu bul
+                        const playerKeys = Object.keys(gameData.players);
+                        opponentId = playerKeys[0];
+                        
+                        // Kendi bilgilerini ekle
+                        updates[`games/${gameIdToJoin}/players/${playerId}`] = {
+                            name: playerName,
+                            score: 0,
+                            answers: {},
+                            ready: false
+                        };
+                        
+                        // Oyun durumunu güncelle
+                        updates[`games/${gameIdToJoin}/status`] = 'playing';
+                        
+                        // Rastgele harf seç
+                        const alphabet = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ';
+                        const randomIndex = Math.floor(Math.random() * alphabet.length);
+                        const selectedLetter = alphabet[randomIndex];
+                        
+                        updates[`games/${gameIdToJoin}/currentLetter`] = selectedLetter;
+                        updates[`games/${gameIdToJoin}/usedLetters`] = [selectedLetter];
+                        
+                        // Güncellemeleri Firebase'e gönder
+                        update(ref(database), updates);
+                        
+                        // Arayüzü güncelle
+                        startBtn.style.display = 'none';
+                        joinGameArea.style.display = 'none';
+                        gameArea.style.display = 'block';
+                        finishBtn.style.display = 'block';
+                        
+                        // Oyun durumunu dinle
+                        listenToGameChanges(gameIdToJoin);
+                    } else {
+                        alert('Bu oyun zaten dolu veya bitmiş!');
+                    }
+                } else {
+                    alert('Geçerli bir oyun bulunamadı!');
+                }
+            }).catch((error) => {
+                console.error("Oyuna katılırken hata oluştu:", error);
+                alert('Bir hata oluştu!');
+            });
+        });
+
+        // Oyun değişikliklerini dinle
+        function listenToGameChanges(gameId) {
+            const gameRef = ref(database, `games/${gameId}`);
+            
+            onValue(gameRef, (snapshot) => {
+                const gameData = snapshot.val();
+                
+                if (!gameData) return;
+                
+                // Oyun durumunu kontrol et
+                if (gameData.status === 'waiting') {
+                    waitingMessage.style.display = 'block';
+                    gameArea.style.display = 'none';
+                } else if (gameData.status === 'playing') {
+                    waitingMessage.style.display = 'none';
+                    gameArea.style.display = 'block';
+                    
+                    // Harf görüntüle
+                    letterDisplay.textContent = gameData.currentLetter;
+                    
+                    // İki oyuncu da hazırsa sonuçları göster
+                    const playerKeys = Object.keys(gameData.players);
+                    if (playerKeys.length === 2) {
+                        opponentId = playerKeys.find(id => id !== playerId);
+                        
+                        // Puanları güncelle
+                        const yourScore = gameData.players[playerId]?.score || 0;
+                        const opponentScore = gameData.players[opponentId]?.score || 0;
+                        
+                        yourScoreDisplay.textContent = yourScore;
+                        opponentScoreDisplay.textContent = opponentScore;
+                        
+                        // Her iki oyuncu da tur için hazırsa sonuçları göster
+                        const bothReady = gameData.players[playerId]?.ready && gameData.players[opponentId]?.ready;
+                        
+                        if (bothReady) {
+                            showGameResults(gameData);
+                        }
+                    }
+                } else if (gameData.status === 'finished') {
+                    // Oyun sonu 
+                    gameOver.style.display = 'block';
+                    finishBtn.style.display = 'none';
+                    gameArea.style.display = 'none';
+                    
+                    // Kazananı belirle
+                    const playerKeys = Object.keys(gameData.players);
+                    if (playerKeys.length === 2) {
+                        const player1 = playerKeys[0];
+                        const player2 = playerKeys[1];
+                        
+                        const score1 = gameData.players[player1].score;
+                        const score2 = gameData.players[player2].score;
+                        
+                        if (score1 > score2 && player1 === playerId) {
+                            winnerMessage.textContent = 'Tebrikler, kazandınız!';
+                        } else if (score2 > score1 && player2 === playerId) {
+                            winnerMessage.textContent = 'Tebrikler, kazandınız!';
+                        } else if (score1 === score2) {
+                            winnerMessage.textContent = 'Oyun berabere bitti!';
+                        } else {
+                            winnerMessage.textContent = 'Rakibiniz kazandı!';
+                        }
+                    }
+                }
+            });
+        }
+
+        // Turu bitir
+        finishBtn.addEventListener('click', function() {
+            if (!currentGameId) return;
+            
+            // Cevapları topla
+            const answers = {};
+            Object.keys(inputs).forEach(category => {
+                answers[category] = inputs[category].value.trim();
+            });
+            
+            // Veritabanını güncelle
+            const updates = {};
+            updates[`games/${currentGameId}/players/${playerId}/answers`] = answers;
+            updates[`games/${currentGameId}/players/${playerId}/ready`] = true;
+            
+            update(ref(database), updates);
+            
+            // Arayüzü güncelle
+            finishBtn.style.display = 'none';
+            gameArea.style.display = 'none';
+            waitingMessage.textContent = 'Rakibin cevapları bekleniyor...';
+            waitingMessage.style.display = 'block';
+        });
+
+        // Sonuçları göster
+        function showGameResults(gameData) {
+            resultsArea.style.display = 'block';
+            waitingMessage.style.display = 'none';
+            nextRoundBtn.style.display = 'block';
+            
+            const yourAnswers = gameData.players[playerId].answers || {};
+            const opponentAnswers = gameData.players[opponentId].answers || {};
+            
+            // Sonuçları görüntüle
+            Object.keys(inputs).forEach(category => {
+                const yourResult = document.getElementById(`result-${category}-you`);
+                const opponentResult = document.getElementById(`result-${category}-opponent`);
+                
+                yourResult.textContent = yourAnswers[category] || '-';
+                opponentResult.textContent = opponentAnswers[category] || '-';
+            });
+        }
+
+        // Sonraki tur
+        nextRoundBtn.addEventListener('click', function() {
+            if (!currentGameId) return;
+            
+            // Form alanlarını temizle
+            Object.values(inputs).forEach(input => {
+                input.value = '';
+            });
+            
+            // Arayüzü güncelle
+            resultsArea.style.display = 'none';
+            nextRoundBtn.style.display = 'none';
+            gameArea.style.display = 'block';
+            finishBtn.style.display = 'block';
+            
+            // Tüm oyuncuların hazır durumunu sıfırla
+            get(ref(database, `games/${currentGameId}`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const gameData = snapshot.val();
+                    const updates = {};
+                    
+                    // Yeni rastgele harf seç
+                    const alphabet = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ';
+                    const usedLetters = gameData.usedLetters || [];
+                    let availableLetters = [...alphabet].filter(letter => !usedLetters.includes(letter));
+                    
+                    if (availableLetters.length === 0) {
+                        availableLetters = [...alphabet];
+                        updates[`games/${currentGameId}/usedLetters`] = [];
+                    }
+                    
+                    const randomIndex = Math.floor(Math.random() * availableLetters.length);
+                    const selectedLetter = availableLetters[randomIndex];
+                    
+                    // Hazır durumlarını sıfırla
+                    Object.keys(gameData.players).forEach(id => {
+                        updates[`games/${currentGameId}/players/${id}/ready`] = false;
+                        updates[`games/${currentGameId}/players/${id}/answers`] = {};
+                    });
+                    
+                    // Yeni harf ve tur bilgisini kaydet
+                    updates[`games/${currentGameId}/currentLetter`] = selectedLetter;
+                    updates[`games/${currentGameId}/usedLetters`] = [...usedLetters, selectedLetter];
+                    updates[`games/${currentGameId}/currentRound`] = (gameData.currentRound || 0) + 1;
+                    
+                    update(ref(database), updates);
+                }
+            });
+        });
+
+        // Rastgele oyuncu ID'si oluştur
+        function generatePlayerId() {
+            return Math.random().toString(36).substring(2, 10);
+        }
+    </script>
+</body>
+</html>
